@@ -6,22 +6,44 @@ from mongoengine import (StringField, DictField, IntField, FloatField,
                          ListField, ReferenceField, EmbeddedDocumentField,
                          DENY, MapField)
 from mongoengine import connect
+import mongoengine
+from functools import wraps
+
+import simdb
 from getpass import getuser
 import time as ttime
-import filestore
-from filestore import commands as fsc
+# import filestore
+# from filestore import commands as fsc
 from uuid import uuid4
 import os
-import ase
-
-ALIAS = 'simdb'
 
 ATOM_PATH = os.path.join(os.path.expanduser('~'), 'data', 'ase-atoms')
 
-connection_config = {'host': 'localhost',
-                     'database': 'simdb',
-                     'port': 27017,
-                     'timezone': 'US/Eastern'}
+def _ensure_connection(func):
+
+    @wraps(func)
+    def inner(*args, **kwargs):
+        database = simdb.connection_config['database']
+        host = simdb.connection_config['host']
+        port = int(simdb.connection_config['port'])
+        connect(db=database, host=host, port=port, alias=simdb.DATABASE_ALIAS)
+        return func(*args, **kwargs)
+    return inner
+
+
+def db_disconnect():
+    """Helper function to deal with stateful connections to mongoengine"""
+    mongoengine.connection.disconnect(simdb.DATABASE_ALIAS)
+    for collection in [Atom, SimulationParameters, Simulation]:
+        collection._collection = None
+
+
+def db_connect(database, host, port):
+    print('database = %s' % database)
+    print('host = %s' % host)
+    print('port = %s' % port)
+    """Helper function to deal with stateful connections to mongoengine"""
+    return connect(db=database, host=host, port=port, alias=simdb.DATABASE_ALIAS)
 
 # create the ase handler
 def ASE_file_handler(*args, **kwargs):
@@ -38,7 +60,7 @@ def find_atom_document(**kwargs):
         atom.file_payload = fsc.retrieve(atom.file_uid)
     return atoms
 
-
+@_ensure_connection
 def insert_atom_document(name, ase_object, time=None):
     if time is None:
         time = ttime.time()
@@ -56,6 +78,20 @@ def insert_atom_document(name, ase_object, time=None):
     # save the document
     a.save()
     return a
+
+
+@_ensure_connection
+def insert_simulation_parameters(name, temperature, iterations,
+                                 target_acceptance, time):
+    if time is None:
+        time = ttime.time()
+    sp = SimulationParameters(name=name, temperature=temperature,
+                              iterations=iterations,
+                              target_acceptance=target_acceptance,
+                              time=time)
+    # save the document
+    sp.save(validate=True, write_concern={"w": 1})
+    return sp
 
 
 class Atom(DynamicDocument):
