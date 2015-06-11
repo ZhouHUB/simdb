@@ -1,0 +1,41 @@
+package:
+  name: simdb
+  version: {{ environ['GIT_DESCRIBE_TAG'] }}.post{{ environ['GIT_DESCRIBE_NUMBER'] }}
+
+source:
+  git_url: ../
+
+build:
+  number: 0
+
+  # Note that this will override the default build string with the Python
+  # and NumPy versions
+  string: {{ environ.get('GIT_BUILD_STR', '') }}_np{{ np }}py{{ py }}
+
+
+requirements:
+  build:
+    - python
+    - six
+
+  run:
+    - python
+    - mongoengine
+    - six
+    - pyyaml
+    - filestore
+
+test:
+  # Python imports
+  imports:
+    - simdb
+    - simdb.commands
+    - simdb.api
+    - simdb.conf
+    - simdb.odm_templates
+    - simdb.document
+    - simdb.utils
+
+about:
+  home: https://github.com/NSLS-II/simdb
+  license: BSD
