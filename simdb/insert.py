@@ -77,7 +77,7 @@ def insert_pdf_data_document(name, input_filename=None,
         r = s.get_r()
 
         # get the atomic configuration from the DB
-        atomic_doc = find_atomic_config_document(_id=atomic_config.id)
+        atomic_doc, = find_atomic_config_document(_id=atomic_config.id)
         atoms = atomic_doc.file_payload
 
         # Generate the PDF from the atomic configuration
@@ -85,7 +85,8 @@ def insert_pdf_data_document(name, input_filename=None,
         generated = True
 
         # Save the gobs
-        np.save(file_name, gobs)
+        f = open(file_name, 'w')
+        np.save(f, gobs)
         res = fsc.insert_resource('genpdf', file_name)
         fsc.insert_datum(res, file_uid)
     else:
@@ -98,10 +99,10 @@ def insert_pdf_data_document(name, input_filename=None,
     # create an instance of a mongo document (metadata)
     if generated is True:
         a = PDFData(name=name, file_uid=file_uid, ase_config_id=atomic_config,
-                    pdf_params=exp_dict, time=time)
+                    pdf_params=params, time=time)
     else:
         a = PDFData(name=name, file_uid=file_uid,
-                    # will support when we mirge this with metadata store
+                    # will support when we merge this with metadata store
                     # experiment_uid=exp_uid,
                     pdf_params=params, time=time)
     # save the document
