@@ -1,52 +1,23 @@
 """
 ODM templates for use with metadatstore
 """
-from functools import wraps
 import os
 
 from mongoengine import DynamicDocument
 from mongoengine import (StringField, DictField, IntField, FloatField,
                          ReferenceField, BooleanField, ListField, DENY)
-from mongoengine import connect
-import mongoengine
-import simdb
 
-ATOM_PATH = os.path.join('/mnt/bulk_data/', 'data', 'ase-atoms')
+DATABASE_ALIAS = 'simdb'
 
-
-def _ensure_connection(func):
-    @wraps(func)
-    def inner(*args, **kwargs):
-        database = simdb.connection_config['database']
-        host = simdb.connection_config['host']
-        port = int(simdb.connection_config['port'])
-        connect(db=database, host=host, port=port, alias=simdb.DATABASE_ALIAS)
-        return func(*args, **kwargs)
-
-    return inner
-
-
-def db_disconnect():
-    """Helper function to deal with stateful connections to mongoengine"""
-    mongoengine.connection.disconnect(simdb.DATABASE_ALIAS)
-    for collection in [AtomicConfig, SimulationParameters, Simulation]:
-        collection._collection = None
-
-
-def db_connect(database, host, port):
-    print('database = %s' % database)
-    print('host = %s' % host)
-    print('port = %s' % port)
-    """Helper function to deal with stateful connections to mongoengine"""
-    return connect(db=database, host=host, port=port,
-                   alias=simdb.DATABASE_ALIAS)
+__all__ = ['AtomicConfig', 'SimulationParameters', 'Calc', 'PES',
+           'Simulation']
 
 
 class AtomicConfig(DynamicDocument):
     name = StringField(required=False)
     file_uid = StringField(required=True, unique=True)
     time = FloatField(required=True)
-    meta = {'indexes': ['_id', 'name']}
+    meta = {'indexes': ['_id', 'name'], 'db_alias': DATABASE_ALIAS}
 
 
 class SimulationParameters(DynamicDocument):
@@ -60,17 +31,19 @@ class SimulationParameters(DynamicDocument):
     # time_out = FloatField(required=True)
 
     time = FloatField(required=True)
-    meta = {'indexes': ['temperature']}
+    meta = {'indexes': ['temperature'], 'db_alias': DATABASE_ALIAS}
 
 
 class Calc(DynamicDocument):
     name = StringField(required=True)
     kwargs = DictField(required=True)
+    meta = {'db_alias': DATABASE_ALIAS}
 
 
 class PES(DynamicDocument):
     name = StringField(required=True)
     calc_list = ListField(required=True)
+    meta = {'db_alias': DATABASE_ALIAS}
 
 
 class Simulation(DynamicDocument):
@@ -91,3 +64,4 @@ class Simulation(DynamicDocument):
     start_time = FloatField()
     end_time = FloatField()
     traj_file_uid = StringField()
+    meta = {'db_alias': DATABASE_ALIAS}

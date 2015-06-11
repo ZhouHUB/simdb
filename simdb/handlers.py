@@ -1,41 +1,29 @@
 __author__ = 'christopher'
 import ase.io as aseio
-from ase.io import PickleTrajectory
+import ase
 import os
-from pyiid.utils import load_gr_file, build_sphere_np
-from pyiid.wrappers.scatter import Scatter
 import math
 
-
-class ASEAtomsHandler(object):
-    def __init__(self, filename, diameter=None):
-        self.file_type = os.path.splitext(filename)[-1]
-        if self.file_type == '.traj':
-            self.contents = PickleTrajectory(filename, 'r')
-        elif diameter is None:
-            self.contents = aseio.read(filename)
-        elif diameter is not None:
-            self.contents = build_sphere_np(filename, diameter/2.)
-
-    def __call__(self, frame_no=None, *args, **kwargs):
-        if frame_no is None:
-            # Return the entire trajectory/atomic configuration
-            return self.contents
-
-        elif type(frame_no) == tuple and self.file_type == '.traj':
-            # Return a chunk of the trajectory
-            if len(frame_no) == 3:
-                sl = frame_no[2]
-            else:
-                sl = 1
-            return self.contents[frame_no[0]:frame_no[1]:sl]
-
-        elif type(frame_no) == int and self.file_type == 'traj':
-            # Return one frame of the trajectory
-            return self.contents[frame_no]
+from filestore.api import register_handler
+from filestore.handlers import HandlerBase
 
 
-class PDFGetX3Handler(object):
+class ASEAtomsHandler(HandlerBase):
+    specs = {'ase'} | HandlerBase.specs
+
+    def __init__(self, filename):
+        self.filename = str(filename)
+
+    def __call__(self, is_trajectory):
+        if is_trajectory:
+            return ase.io.PickleTrajectory(self.filename, 'r')
+        else:
+            return ase.io.read(self.filename)
+
+
+class PDFGetX3Handler(HandlerBase):
+    specs = {'pdfgetx3'} | HandlerBase.specs
+
     def __init__(self, filename):
         self.contents = load_gr_file(filename)
 
@@ -53,3 +41,9 @@ class PDFGetX3Handler(object):
         s = Scatter(exp)
 
         return r, gobs, exp, s
+
+
+handlers = [ASEAtomsHandler, PDFGetX3Handler]
+for handler in handlers:
+    for spec in handler.specs:
+        register_handler(spec, handler)
