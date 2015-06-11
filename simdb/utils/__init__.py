@@ -4,7 +4,7 @@ from mongoengine import connect
 import mongoengine
 import importlib
 
-from .. import odm_templates
+import simdb.odm_templates
 
 def _ensure_connection(func):
     @wraps(func)

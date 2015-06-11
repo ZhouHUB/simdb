@@ -12,21 +12,22 @@ DATABASE_ALIAS = 'simdb'
 __all__ = ['PDFData', 'AtomicConfig', 'SimulationParameters', 'Calc', 'PES',
            'Simulation']
 
-class PDFData(DynamicDocument):
-    name = StringField(required=True)
-    data_uid = StringField(required=True)
-    experiment_uid = StringField()
-    ase_config_id = ReferenceField()
-    pdf_params = DictField(required=True)
-    time = FloatField(required=True)
-    meta = {'indexes': ['_id', 'name'], 'db_alias': DATABASE_ALIAS}
-
-
 class AtomicConfig(DynamicDocument):
     name = StringField(required=False)
     file_uid = StringField(required=True, unique=True)
     time = FloatField(required=True)
     meta = {'indexes': ['_id', 'name'], 'db_alias': DATABASE_ALIAS}
+
+
+class PDFData(DynamicDocument):
+    name = StringField(required=True)
+    file_uid = StringField(required=True)
+    experiment_uid = StringField()
+    ase_config_id = ReferenceField(AtomicConfig)
+    pdf_params = DictField(required=True)
+    time = FloatField(required=True)
+    meta = {'indexes': ['_id', 'name'], 'db_alias': DATABASE_ALIAS}
+
 
 
 class SimulationParameters(DynamicDocument):
