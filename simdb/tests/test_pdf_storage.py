@@ -15,6 +15,7 @@ from nose.tools import assert_equal, assert_not_equal
 def setup():
     simdb_setup()
     simdb.PDF_PATH = tempfile.gettempdir()
+    simdb.ATOM_PATH = tempfile.gettempdir()
 
 
 def teardown():
@@ -22,7 +23,7 @@ def teardown():
     simdb_teardown()
 
 
-def test_insert_and_retrieve():
+def test_insert_and_retrieve_fabricated_data():
     atoms = ase.Atoms('Au2', [[0, 0, 0], [0, 0, 3]])
     a = insert_atom_document('au2', atoms)
     ret, = find_atomic_config_document(_id=a.id)

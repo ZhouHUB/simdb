@@ -74,7 +74,6 @@ def insert_pdf_data_document(name, input_filename=None,
 
         # Just in case we use the exp_dict = None default params
         params = s.exp
-        r = s.get_r()
 
         # get the atomic configuration from the DB
         atomic_doc, = find_atomic_config_document(_id=atomic_config.id)
@@ -85,16 +84,18 @@ def insert_pdf_data_document(name, input_filename=None,
         generated = True
 
         # Save the gobs
+        #TODO: replace with context
         f = open(file_name, 'w')
         np.save(f, gobs)
+        f.close()
         res = fsc.insert_resource('genpdf', file_name)
         fsc.insert_datum(res, file_uid)
     else:
         # Then the pdf is experimental, thus we should let filestore know it
-        # exists, an load the PDF generating parameters into the Metadata
+        # exists, and load the PDF generating parameters into the Metadata
         res = fsc.insert_resource('pdfgetx3', input_filename)
         fsc.insert_datum(res, file_uid)
-        r, gobs, params = load_gr_file(input_filename)
+        params = load_gr_file(input_filename)[-1]
 
     # create an instance of a mongo document (metadata)
     if generated is True:
@@ -108,3 +109,24 @@ def insert_pdf_data_document(name, input_filename=None,
     # save the document
     a.save()
     return a
+
+@_ensure_connection
+def insert_pes(name, calc_list, time=None):
+    if time is None:
+        time = ttime.time()
+    pes = PES(name=name, calc_list=calc_list,
+                              time=time)
+    # save the document
+    pes.save(validate=True, write_concern={"w": 1})
+    return pes
+
+
+@_ensure_connection
+def insert_calc(name, calc_list, time=None):
+    if time is None:
+        time = ttime.time()
+    pes = PES(name=name, calc_list=calc_list,
+                              time=time)
+    # save the document
+    pes.save(validate=True, write_concern={"w": 1})
+    return pes
