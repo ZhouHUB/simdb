@@ -6,6 +6,7 @@ import math
 
 from filestore.api import register_handler
 from filestore.handlers import HandlerBase
+from .odm_templates import Resource, Datum, ALIAS
 import numpy as np
 
 from pyiid.utils import load_gr_file
@@ -35,11 +36,24 @@ class PDFGetX3Handler(HandlerBase):
 
 class GeneratedPDFHandler(HandlerBase):
     specs = {'genpdf'} | HandlerBase.specs
+
     def __init__(self, filename):
         self.filename = str(filename)
 
     def __call__(self):
         return np.load(self.filename)
+
+
+class FileLocation(HandlerBase):
+    specs = {'fileloc'} | HandlerBase.specs
+
+    def __init__(self, filename):
+        self.filename = filename
+
+    def __call__(self, *args, **kwargs):
+        # I need a way to given the UID get the file location back
+        return self.filename
+
 
 handlers = [ASEAtomsHandler, PDFGetX3Handler, GeneratedPDFHandler]
 for handler in handlers:

@@ -45,9 +45,9 @@ class PES(DynamicDocument):
 
 class SimulationParameters(DynamicDocument):
     temperature = FloatField(required=True)
+    iterations = IntField(required=True)
     target_acceptance = FloatField(required=True)
     continue_sim = BooleanField(default=True)
-    iterations = IntField(required=True)
 
     time = FloatField(required=True)
     meta = {'indexes': ['temperature'], 'db_alias': DATABASE_ALIAS}

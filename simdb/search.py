@@ -78,3 +78,11 @@ def find_simulation_parameter_document(**kwargs):
         '-_id').all()
     for params in sim_params:
         yield params
+
+
+@_ensure_connection
+def find_simulation_document(**kwargs):
+    sims = Simulation.objects(__raw__=kwargs).order_by(
+        '-_id').all()
+    for sim in sims:
+        yield sim

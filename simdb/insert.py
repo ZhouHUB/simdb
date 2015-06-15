@@ -121,14 +121,25 @@ def insert_pes(name, calc_list, time=None):
 
 @_ensure_connection
 def insert_simulation_parameters(name, temperature, iterations,
-                                 target_acceptance, time=None):
+                                 target_acceptance=.65, continue_sim=True,
+                                 time=None):
     if time is None:
         time = ttime.time()
     sp = SimulationParameters(name=name, temperature=temperature,
                               iterations=iterations,
                               target_acceptance=target_acceptance,
+                              continue_sim=continue_sim,
                               time=time)
     # save the document
     sp.save(validate=True, write_concern={"w": 1})
     return sp
 
+
+@_ensure_connection
+def insert_simulation(name, params, atoms, pes, skip=False, time=None):
+    if time is None:
+        time = ttime.time()
+    sp = Simulation(name=name, params=params, atoms=atoms, pes=pes, skip=skip)
+    # save the document
+    sp.save(validate=True, write_concern={"w": 1})
+    return sp
