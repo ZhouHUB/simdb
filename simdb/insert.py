@@ -16,20 +16,6 @@ __author__ = 'christopher'
 
 
 @_ensure_connection
-def insert_simulation_parameters(name, temperature, iterations,
-                                 target_acceptance, time=None):
-    if time is None:
-        time = ttime.time()
-    sp = SimulationParameters(name=name, temperature=temperature,
-                              iterations=iterations,
-                              target_acceptance=target_acceptance,
-                              time=time)
-    # save the document
-    sp.save(validate=True, write_concern={"w": 1})
-    return sp
-
-
-@_ensure_connection
 def insert_atom_document(name, ase_object, time=None):
     if time is None:
         time = ttime.time()
@@ -84,7 +70,7 @@ def insert_pdf_data_document(name, input_filename=None,
         generated = True
 
         # Save the gobs
-        #TODO: replace with context
+        # TODO: replace with context
         f = open(file_name, 'w')
         np.save(f, gobs)
         f.close()
@@ -110,23 +96,39 @@ def insert_pdf_data_document(name, input_filename=None,
     a.save()
     return a
 
+
+@_ensure_connection
+def insert_calc(name, calculator, calc_kwargs, time=None):
+    if time is None:
+        time = ttime.time()
+    calc = Calc(name=name, calculator=calculator, kwargs=calc_kwargs,
+               time=time)
+    # save the document
+    calc.save(validate=True, write_concern={"w": 1})
+    return calc
+
+
 @_ensure_connection
 def insert_pes(name, calc_list, time=None):
     if time is None:
         time = ttime.time()
     pes = PES(name=name, calc_list=calc_list,
-                              time=time)
+              time=time)
     # save the document
     pes.save(validate=True, write_concern={"w": 1})
     return pes
 
 
 @_ensure_connection
-def insert_calc(name, calc_list, time=None):
+def insert_simulation_parameters(name, temperature, iterations,
+                                 target_acceptance, time=None):
     if time is None:
         time = ttime.time()
-    pes = PES(name=name, calc_list=calc_list,
+    sp = SimulationParameters(name=name, temperature=temperature,
+                              iterations=iterations,
+                              target_acceptance=target_acceptance,
                               time=time)
     # save the document
-    pes.save(validate=True, write_concern={"w": 1})
-    return pes
+    sp.save(validate=True, write_concern={"w": 1})
+    return sp
+

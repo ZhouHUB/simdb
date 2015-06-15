@@ -30,16 +30,6 @@ class PDFData(DynamicDocument):
     meta = {'indexes': ['_id', 'name'], 'db_alias': DATABASE_ALIAS}
 
 
-class SimulationParameters(DynamicDocument):
-    temperature = FloatField(required=True)
-    target_acceptance = FloatField(required=True)
-    continue_sim = BooleanField(default=True)
-    iterations = IntField(required=True)
-
-    time = FloatField(required=True)
-    meta = {'indexes': ['temperature'], 'db_alias': DATABASE_ALIAS}
-
-
 class Calc(DynamicDocument):
     name = StringField(required=True)
     calculator = StringField(required=True)
@@ -51,6 +41,16 @@ class PES(DynamicDocument):
     name = StringField(required=True)
     calc_list = ListField(required=True)
     meta = {'db_alias': DATABASE_ALIAS}
+
+
+class SimulationParameters(DynamicDocument):
+    temperature = FloatField(required=True)
+    target_acceptance = FloatField(required=True)
+    continue_sim = BooleanField(default=True)
+    iterations = IntField(required=True)
+
+    time = FloatField(required=True)
+    meta = {'indexes': ['temperature'], 'db_alias': DATABASE_ALIAS}
 
 
 class Simulation(DynamicDocument):

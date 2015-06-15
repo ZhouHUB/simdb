@@ -11,7 +11,7 @@ __author__ = 'christopher'
 supported_calculators = {
     'PDF': ['pyiid.calc.pdfcalc', 'PDFCalc'],
     # 'FQ': ['pyiid.calc.fqcalc', 'FQCalc'],
-    'Spring': ['pyiid.calc.spring', 'Spring'],
+    'Spring': ['pyiid.calc.spring_calc', 'Spring'],
     'LAMMPS': ['ase.calculators.lammpslib', 'LAMMPSlib']
 }
 
@@ -22,6 +22,7 @@ def build_calculator(calculator, calc_kwargs):
         mod = importlib.import_module(supported_calculators[calculator][0])
         calc = getattr(mod, supported_calculators[calculator][1])
         return calc(**calc_kwargs)
+
 
 @_ensure_connection
 def find_atomic_config_document(**kwargs):
@@ -41,11 +42,17 @@ def find_pdf_data_document(**kwargs):
 
 
 @_ensure_connection
-def find_simulation_parameter_document(**kwargs):
-    super_param = SimulationParameters.objects(__raw__=kwargs).order_by(
+def find_calc_document(**kwargs):
+    calculators = Calc.objects(__raw__=kwargs).order_by(
         '-_id').all()
-    for params in super_param:
-        yield params
+    for calc in calculators:
+        # build the calculator
+        return_calc = build_calculator(
+                calculator=calc.calculator,
+                calc_kwargs=calc.kwargs
+            )
+        calc.payload = return_calc
+        yield calc
 
 
 @_ensure_connection
@@ -61,6 +68,13 @@ def find_pes_document(**kwargs):
                 calc_kwargs=calc_params.kwargs
             )
             calc_l.append(calc)
-            pass
         pes.payload = MultiCalc(calc_list=calc_l)
         yield pes
+
+
+@_ensure_connection
+def find_simulation_parameter_document(**kwargs):
+    sim_params = SimulationParameters.objects(__raw__=kwargs).order_by(
+        '-_id').all()
+    for params in sim_params:
+        yield params
