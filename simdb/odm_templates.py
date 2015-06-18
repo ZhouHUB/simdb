@@ -68,7 +68,7 @@ class Simulation(DynamicDocument):
     # queue control
     ran = BooleanField(default=False)
     skip = BooleanField(default=False)
-    errored = False
+    error = BooleanField(default=False)
 
     # Simulation returns
     start_total_energy = FloatField()
