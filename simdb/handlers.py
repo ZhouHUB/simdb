@@ -6,7 +6,6 @@ import math
 
 from filestore.api import register_handler
 from filestore.handlers import HandlerBase
-from .odm_templates import Resource, Datum, ALIAS
 import numpy as np
 
 from pyiid.utils import load_gr_file
@@ -17,11 +16,12 @@ class ASEAtomsHandler(HandlerBase):
     def __init__(self, filename):
         self.filename = str(filename)
 
-    def __call__(self, is_trajectory):
-        if is_trajectory:
-            return ase.io.PickleTrajectory(self.filename, 'r')
-        else:
-            return ase.io.read(self.filename)
+    def __call__(self,**kwargs):
+        try:
+            ret = ase.io.PickleTrajectory(self.filename, 'r')[:]
+        except:
+            ret = ase.io.read(self.filename)
+        return ret
 
 
 class PDFGetX3Handler(HandlerBase):
@@ -30,8 +30,8 @@ class PDFGetX3Handler(HandlerBase):
     def __init__(self, filename):
         self.filename = str(filename)
 
-    def __call__(self):
-        return load_gr_file(self.filename)[1]
+    def __call__(self, **kwargs):
+        return load_gr_file(self.filename, **kwargs)[1]
 
 
 class GeneratedPDFHandler(HandlerBase):
@@ -40,7 +40,7 @@ class GeneratedPDFHandler(HandlerBase):
     def __init__(self, filename):
         self.filename = str(filename)
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         return np.load(self.filename)
 
 
@@ -50,8 +50,7 @@ class FileLocation(HandlerBase):
     def __init__(self, filename):
         self.filename = filename
 
-    def __call__(self, *args, **kwargs):
-        # I need a way to given the UID get the file location back
+    def __call__(self, **kwargs):
         return self.filename
 
 

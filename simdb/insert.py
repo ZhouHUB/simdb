@@ -63,7 +63,7 @@ def insert_pdf_data_document(name, input_filename=None,
 
         # get the atomic configuration from the DB
         atomic_doc, = find_atomic_config_document(_id=atomic_config.id)
-        atoms = atomic_doc.file_payload
+        atoms = atomic_doc.file_payload[-1]
 
         # Generate the PDF from the atomic configuration
         gobs = s.get_pdf(atoms)
@@ -98,11 +98,15 @@ def insert_pdf_data_document(name, input_filename=None,
 
 
 @_ensure_connection
-def insert_calc(name, calculator, calc_kwargs, time=None):
+def insert_calc(name, calculator, calc_kwargs, calc_exp=None, time=None):
     if time is None:
         time = ttime.time()
-    calc = Calc(name=name, calculator=calculator, kwargs=calc_kwargs,
-               time=time)
+    if calc_exp is not None:
+        calc = Calc(name=name, calculator=calculator, calc_kwargs=calc_kwargs,
+                    calc_exp=calc_exp, time=time)
+    else:
+        calc = Calc(name=name, calculator=calculator, calc_kwargs=calc_kwargs,
+                    time=time)
     # save the document
     calc.save(validate=True, write_concern={"w": 1})
     return calc

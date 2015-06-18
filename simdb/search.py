@@ -8,22 +8,6 @@ import importlib
 
 __author__ = 'christopher'
 
-supported_calculators = {
-    'PDF': ['pyiid.calc.pdfcalc', 'PDFCalc'],
-    # 'FQ': ['pyiid.calc.fqcalc', 'FQCalc'],
-    'Spring': ['pyiid.calc.spring_calc', 'Spring'],
-    'LAMMPS': ['ase.calculators.lammpslib', 'LAMMPSlib']
-}
-
-def build_calculator(calculator, calc_kwargs):
-    if calculator in supported_calculators.keys():
-        # If experimental PES put in the exp, also modify the calcs themselves
-        # they may need to write their own scatter object
-        mod = importlib.import_module(supported_calculators[calculator][0])
-        calc = getattr(mod, supported_calculators[calculator][1])
-        return calc(**calc_kwargs)
-
-
 @_ensure_connection
 def find_atomic_config_document(**kwargs):
     atomic_configs = AtomicConfig.objects(__raw__=kwargs).order_by(
@@ -41,6 +25,28 @@ def find_pdf_data_document(**kwargs):
         yield data_set
 
 
+supported_calculators = {
+    'PDF': ['pyiid.calc.pdfcalc', 'PDFCalc', find_pdf_data_document],
+    # 'FQ': ['pyiid.calc.fqcalc', 'FQCalc', find_fq_data_document],
+    'Spring': ['pyiid.calc.spring_calc', 'Spring'],
+    'LAMMPS': ['ase.calculators.lammpslib', 'LAMMPSlib']
+}
+
+
+def build_calculator(calculator, calc_kwargs, calc_exp=None):
+    if calculator in supported_calculators.keys():
+        # If experimental PES put in the exp, also modify the calcs themselves
+        # they may need to write their own scatter object
+        mod = importlib.import_module(supported_calculators[calculator][0])
+        calc = getattr(mod, supported_calculators[calculator][1])
+        if calc_exp is not None:
+            exp, = supported_calculators[calculator][2](_id=calc_exp.id)
+            exp_data = exp.file_payload
+            return calc(obs_data=exp_data, **calc_kwargs)
+        else:
+            return calc(**calc_kwargs)
+
+
 @_ensure_connection
 def find_calc_document(**kwargs):
     calculators = Calc.objects(__raw__=kwargs).order_by(
@@ -48,9 +54,10 @@ def find_calc_document(**kwargs):
     for calc in calculators:
         # build the calculator
         return_calc = build_calculator(
-                calculator=calc.calculator,
-                calc_kwargs=calc.kwargs
-            )
+            calculator=calc.calculator,
+            calc_kwargs=calc.calc_kwargs,
+            calc_exp=calc.calc_exp
+        )
         calc.payload = return_calc
         yield calc
 
@@ -65,7 +72,8 @@ def find_pes_document(**kwargs):
             # build the calculator
             calc = build_calculator(
                 calculator=calc_params.calculator,
-                calc_kwargs=calc_params.kwargs
+                calc_kwargs=calc_params.calc_kwargs,
+                calc_exp=calc_params.calc_exp
             )
             calc_l.append(calc)
         pes.payload = MultiCalc(calc_list=calc_l)

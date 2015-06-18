@@ -33,7 +33,8 @@ class PDFData(DynamicDocument):
 class Calc(DynamicDocument):
     name = StringField(required=True)
     calculator = StringField(required=True)
-    kwargs = DictField(required=True)
+    calc_kwargs = DictField(required=True)
+    calc_exp = ReferenceField(PDFData)
     meta = {'db_alias': DATABASE_ALIAS}
 
 
@@ -67,11 +68,21 @@ class Simulation(DynamicDocument):
     # queue control
     ran = BooleanField(default=False)
     skip = BooleanField(default=False)
+    errored = False
 
     # Simulation returns
-    start_energy = FloatField()
-    final_energy = FloatField()
+    start_total_energy = FloatField()
+    start_potential_energy = FloatField()
+    start_kinetic_energy = FloatField()
+
+    final_total_energy = FloatField()
+    final_potential_energy = FloatField()
+    final_kinetic_energy = FloatField()
+
     start_time = FloatField()
     end_time = FloatField()
-    traj_file_uid = StringField()
+
+    # Simulation metadata results
+    total_samples = IntField()
+    leapfrog_per_iter = FloatField()
     meta = {'db_alias': DATABASE_ALIAS}
