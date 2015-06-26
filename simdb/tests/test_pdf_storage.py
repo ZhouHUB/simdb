@@ -32,7 +32,7 @@ def test_insert_and_retrieve_fabricated_data():
 
     ret_pdf, = find_pdf_data_document(_id=pdf.id)
     s = Scatter()
-    actual_gr = s.get_pdf(ret.file_payload)
+    actual_gr = s.get_pdf(ret.file_payload[0])
     # make sure the retrieved document got something from filestore
     assert(hasattr(ret_pdf, 'file_payload'))
     # make sure the payload is equivalent to the original atoms

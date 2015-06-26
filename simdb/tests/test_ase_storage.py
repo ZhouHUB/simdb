@@ -29,7 +29,7 @@ def test_single_config():
     # make sure the retrieved document got something from filestore
     assert(hasattr(ret, 'file_payload'))
     # make sure the payload is equivalent to the original atoms
-    assert(atoms == ret.file_payload)
+    assert(atoms == ret.file_payload[0])
     # make sure that the bits that came back from filestore are a different
     # object
     assert_not_equal(id(atoms), id(ret.file_payload))

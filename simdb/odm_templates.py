@@ -69,6 +69,7 @@ class Simulation(DynamicDocument):
     ran = BooleanField(default=False)
     skip = BooleanField(default=False)
     error = BooleanField(default=False)
+    solved = BooleanField(default=False)
 
     # Simulation returns
     start_total_energy = FloatField()
@@ -83,6 +84,6 @@ class Simulation(DynamicDocument):
     end_time = FloatField()
 
     # Simulation metadata results
-    total_samples = IntField()
-    leapfrog_per_iter = FloatField()
+    total_samples = IntField(default=0)
+    leapfrog_per_iter = FloatField(default=0)
     meta = {'db_alias': DATABASE_ALIAS}

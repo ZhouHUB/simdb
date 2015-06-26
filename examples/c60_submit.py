@@ -34,7 +34,7 @@ pes, = find_pes_document(name='C60 PDF Spring')
 # Create the simulation parameters
 # params = insert_simulation_parameters('T=1, iter=100, accept=.65', 1, 100, .65,
 #                                       continue_sim=True)
-params = find_simulation_parameter_document(name='T=1, iter=100, accept=.65')
+params, = find_simulation_parameter_document(name='T=1, iter=100, accept=.65')
 
 rattles = [.05, .07, .08, .1]
 for rattle in rattles:
