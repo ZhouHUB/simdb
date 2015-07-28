@@ -1,6 +1,4 @@
 import simdb
-from uuid import uuid4
-import simdb
 from simdb.odm_templates import AtomicConfig, SimulationParameters
 from simdb.insert import insert_atom_document, insert_simulation_parameters
 from simdb.search import find_atomic_config_document
