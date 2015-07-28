@@ -6,7 +6,7 @@ from ase import io as aseio
 from .utils import _ensure_connection
 from .odm_templates import *
 from filestore import commands as fsc
-from pyiid.utils import load_gr_file
+from simdb.readers.pdfgetx3_gr import load_gr_file
 from pyiid.wrappers.elasticscatter import ElasticScatter as Scatter
 import numpy as np
 from .search import find_atomic_config_document
