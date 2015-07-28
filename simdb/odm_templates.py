@@ -9,7 +9,7 @@ from mongoengine import (StringField, DictField, IntField, FloatField,
 
 DATABASE_ALIAS = 'simdb'
 
-__all__ = ['AtomicConfig', 'SimulationParameters', 'Calc', 'PES',
+__all__ = ['PDFData', 'AtomicConfig', 'SimulationParameters', 'Calc', 'PES',
            'Simulation']
 
 
@@ -20,23 +20,21 @@ class AtomicConfig(DynamicDocument):
     meta = {'indexes': ['_id', 'name'], 'db_alias': DATABASE_ALIAS}
 
 
-class SimulationParameters(DynamicDocument):
-    temperature = FloatField(required=True)
-    target_acceptance = FloatField(required=True)
-    continue_sim = BooleanField(default=True)
-
-    iterations = IntField(required=True)
-    # target_energy = FloatField(required=True)
-    # equilibrium_iterations = IntField(required=True)
-    # time_out = FloatField(required=True)
-
+class PDFData(DynamicDocument):
+    name = StringField(required=True)
+    file_uid = StringField(required=True)
+    experiment_uid = StringField()
+    ase_config_id = ReferenceField(AtomicConfig)
+    pdf_params = DictField(required=True)
     time = FloatField(required=True)
-    meta = {'indexes': ['temperature'], 'db_alias': DATABASE_ALIAS}
+    meta = {'indexes': ['_id', 'name'], 'db_alias': DATABASE_ALIAS}
 
 
 class Calc(DynamicDocument):
     name = StringField(required=True)
-    kwargs = DictField(required=True)
+    calculator = StringField(required=True)
+    calc_kwargs = DictField(required=True)
+    calc_exp = ReferenceField(PDFData)
     meta = {'db_alias': DATABASE_ALIAS}
 
 
@@ -44,6 +42,16 @@ class PES(DynamicDocument):
     name = StringField(required=True)
     calc_list = ListField(required=True)
     meta = {'db_alias': DATABASE_ALIAS}
+
+
+class SimulationParameters(DynamicDocument):
+    temperature = FloatField(required=True)
+    iterations = IntField(required=True)
+    target_acceptance = FloatField(required=True)
+    continue_sim = BooleanField(default=True)
+
+    time = FloatField(required=True)
+    meta = {'indexes': ['temperature'], 'db_alias': DATABASE_ALIAS}
 
 
 class Simulation(DynamicDocument):
@@ -57,11 +65,25 @@ class Simulation(DynamicDocument):
                            db_field='atoms_id')
     pes = ReferenceField(PES, reverse_delete_rule=DENY, required=True,
                          db_field='PES_id')
+    # queue control
+    ran = BooleanField(default=False)
+    skip = BooleanField(default=False)
+    error = BooleanField(default=False)
+    solved = BooleanField(default=False)
 
     # Simulation returns
-    start_energy = FloatField()
-    final_energy = FloatField()
+    start_total_energy = FloatField()
+    start_potential_energy = FloatField()
+    start_kinetic_energy = FloatField()
+
+    final_total_energy = FloatField()
+    final_potential_energy = FloatField()
+    final_kinetic_energy = FloatField()
+
     start_time = FloatField()
     end_time = FloatField()
-    traj_file_uid = StringField()
+
+    # Simulation metadata results
+    total_samples = IntField(default=0)
+    leapfrog_per_iter = FloatField(default=0)
     meta = {'db_alias': DATABASE_ALIAS}

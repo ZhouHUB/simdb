@@ -6,7 +6,9 @@ import math
 
 from filestore.api import register_handler
 from filestore.handlers import HandlerBase
+import numpy as np
 
+from pyiid.utils import load_gr_file
 
 class ASEAtomsHandler(HandlerBase):
     specs = {'ase'} | HandlerBase.specs
@@ -14,36 +16,45 @@ class ASEAtomsHandler(HandlerBase):
     def __init__(self, filename):
         self.filename = str(filename)
 
-    def __call__(self, is_trajectory):
-        if is_trajectory:
-            return ase.io.PickleTrajectory(self.filename, 'r')
-        else:
-            return ase.io.read(self.filename)
+    def __call__(self,**kwargs):
+        try:
+            ret = ase.io.PickleTrajectory(self.filename, 'r')[:]
+        except:
+            ret = ase.io.read(self.filename)
+        return ret
 
 
 class PDFGetX3Handler(HandlerBase):
     specs = {'pdfgetx3'} | HandlerBase.specs
 
     def __init__(self, filename):
-        self.contents = load_gr_file(filename)
+        self.filename = str(filename)
 
-    def __call__(self, rmin=None, rmax=None, *args, **kwargs):
-        r, gobs, exp = self.contents
-        if rmax is not None:
-            exp['rmax'] = rmax
-            r = r[:math.ceil(rmax/exp['rstep'])]
-            gobs = gobs[:math.ceil(rmax/exp['rstep'])]
-        if rmin is not None:
-            exp['rmin'] = rmin
-            r = r[math.ceil(rmin/exp['rstep']):]
-            gobs = gobs[math.ceil(rmin/exp['rstep']):]
-
-        s = Scatter(exp)
-
-        return r, gobs, exp, s
+    def __call__(self, **kwargs):
+        return load_gr_file(self.filename, **kwargs)[1]
 
 
-handlers = [ASEAtomsHandler, PDFGetX3Handler]
+class GeneratedPDFHandler(HandlerBase):
+    specs = {'genpdf'} | HandlerBase.specs
+
+    def __init__(self, filename):
+        self.filename = str(filename)
+
+    def __call__(self, **kwargs):
+        return np.load(self.filename)
+
+
+class FileLocation(HandlerBase):
+    specs = {'fileloc'} | HandlerBase.specs
+
+    def __init__(self, filename):
+        self.filename = filename
+
+    def __call__(self, **kwargs):
+        return self.filename
+
+
+handlers = [ASEAtomsHandler, PDFGetX3Handler, GeneratedPDFHandler]
 for handler in handlers:
     for spec in handler.specs:
         register_handler(spec, handler)

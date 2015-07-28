@@ -7,6 +7,6 @@ connection_config = {'host': 'localhost',
                      'port': 27017,
                      'timezone': 'US/Eastern'}
 
-ATOM_PATH = os.path.join('/mnt/bulk_data/', 'data', 'ase-atoms')
-
+ATOM_PATH = os.path.join('/mnt/bulk-data/', 'data', 'ase-atoms')
+PDF_PATH = os.path.join('/mnt/bulk-data/', 'data', 'PDF')
 from . import handlers
