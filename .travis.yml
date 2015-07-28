@@ -28,10 +28,7 @@ install:
   - source activate testenv
   - pip install coveralls mongoengine boltons python-ase
   - 'pip install https://github.com/NSLS-II/filestore/zipball/master#egg=filestore'
-  - git clone git@github.com:ZhouHUB/pyIID
-  - cd pyIID
-  - python setup.py install
-  - cd ..
+  - pip install -e git+git@github.com:ZhouHUB/pyIID.git@master#egg=pyIID
   - python setup.py install
   - pip install coveralls
 
