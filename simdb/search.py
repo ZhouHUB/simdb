@@ -47,6 +47,7 @@ def build_calculator(calculator, calc_kwargs, calc_exp=None):
             return calc(**calc_kwargs)
 
 
+
 @_ensure_connection
 def find_calc_document(**kwargs):
     calculators = Calc.objects(__raw__=kwargs).order_by(
