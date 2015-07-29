@@ -8,7 +8,7 @@ from filestore.api import register_handler
 from filestore.handlers import HandlerBase
 import numpy as np
 
-from pyiid.utils import load_gr_file
+from simdb.readers.pdfgetx3_gr import load_gr_file
 
 class ASEAtomsHandler(HandlerBase):
     specs = {'ase'} | HandlerBase.specs
